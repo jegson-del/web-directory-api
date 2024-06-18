@@ -12,8 +12,8 @@ class WebsiteListingService implements WebsiteListingInterface
 {
     public function listwebsites($searchTerm, $sortDirection, $perPage)
     {
-        $query = Category::join('categories_website', 'categories.id', '=', 'categories_website.category_id')
-        ->join('websites', 'categories_website.website_id', '=', 'websites.id')
+        $query = Category::join('category_website', 'categories.id', '=', 'category_website.category_id')
+        ->join('websites', 'category_website.website_id', '=', 'websites.id')
         ->leftJoin('votes', 'websites.id', '=', 'votes.website_id')
         ->select('categories.name as category_name')
         ->selectRaw('websites.*, COUNT(votes.id) as votes_count')
