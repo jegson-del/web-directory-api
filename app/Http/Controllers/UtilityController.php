@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Contracts\WebsiteListingInterface;
 use App\Helpers\ResponseHelper;
+use App\Http\Requests\VoteRequest;
 use App\Models\Vote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +22,7 @@ class UtilityController extends Controller
     {
         $perpage = 50;
         $searchTerm = $request->search;
-        $sortDirection = $request->sortDirection;
+        $sortDirection = $request->sort_direction;
         try {
             $data = $this->listingService->listwebsites($searchTerm, $sortDirection, $perpage);
             if ($data) {
@@ -34,10 +35,10 @@ class UtilityController extends Controller
         }
     }
 
-    public function vote($website_id)
+    public function vote(VoteRequest $request)
     {
         $model = new Vote();
-
+        $website_id = $request->website_id;
         $data = $this->listingService->voteWebsites($model, $website_id);
 
         if (!$data) {
@@ -47,10 +48,10 @@ class UtilityController extends Controller
         return ResponseHelper::success(true, 'vote added successfully', $data, 201);
     }
 
-    public function unvote($website_id)
+    public function unvote(VoteRequest $request)
     {
         $model = new Vote();
-
+        $website_id = $request->website_id;
         $data = $this->listingService->removeVote($model, $website_id);
         if ($data) {
             return ResponseHelper::success(true, ' you have unvote website succesfully', $data, 200);

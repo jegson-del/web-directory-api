@@ -10,38 +10,37 @@ use Illuminate\Support\Facades\Auth;
 
 class WebsiteListingService implements WebsiteListingInterface
 {
-    public function listwebsites($searchTerm, $sortDirection, $perPage)
+    public function listwebsites($searchTerm = null, $sortDirection, $perPage = null)
     {
-        $query = Category::join('category_website', 'categories.id', '=', 'category_website.category_id')
-        ->join('websites', 'category_website.website_id', '=', 'websites.id')
-        ->leftJoin('votes', 'websites.id', '=', 'votes.website_id')
-        ->select('categories.name as category_name')
-        ->selectRaw('websites.*, COUNT(votes.id) as votes_count')
-        ->groupBy('categories.id', 'websites.id')
-        ->orderBy('websites.ranking', 'desc'); // Order by highest ranking by default
-
-        if ($searchTerm) {
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('websites.name', 'LIKE', "%$searchTerm%")
-                ->orWhere('categories.name', 'LIKE', "%$searchTerm%");
-            });
-        }
-
-        // Validate sort direction if both params was presented
         if (!in_array($sortDirection, ['asc', 'desc'])) {
-            $sortDirection = 'desc'; // use default DESC
+            $sortDirection = 'desc';
         }
+        $categories = Category::with(['websites' => function ($query) use ($sortDirection, $searchTerm) {
+            $query->when($searchTerm, function ($q) use ($searchTerm) {
+                $q->where('name', 'like', '%'.$searchTerm.'%')
+                      ->orWhere('description', 'like', '%'.$searchTerm.'%');
+            })
+                ->orderBy('ranking', $sortDirection);
+        }])
+        ->orderBy('name', 'asc')
+        ->get();
 
-        // Order by votes or ranking
-        if ($sortDirection === 'asc') {
-            $query->orderBy('votes_count', 'asc')
-              ->orderBy('websites.ranking', 'asc');
-        } else {
-            $query->orderByDesc('votes_count')
-              ->orderByDesc('websites.ranking');
-        }
+        $formattedCategories = $categories->map(function ($category) {
+            return [
+            'category_name' => $category->name,
+            'websites' => $category->websites->map(function ($website) {
+                return [
+                    'name' => $website->name,
+                    'description' => $website->description,
+                    'url' => $website->url,
+                    'ranking' => $website->ranking,
+                    'votes_count' => $website->votes()->count(),
+                ];
+            })->toArray(),
+        ];
+        })->toArray();
 
-        return $query->paginate($perPage);
+        return $formattedCategories;
     }
 
     public function voteWebsites(Model $model, $website_id)

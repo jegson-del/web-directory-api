@@ -21,8 +21,8 @@ Route::get('logout', [AuthenticantionController::class, 'logout']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('create', [WebsiteController::class, 'create']);
-    Route::get('show/{id}', [WebsiteController::class, 'view']);
-    Route::delete('delete/{id}', [WebsiteController::class, 'delete'])->middleware('admin');
-    Route::post('vote{website_id}', [UtilityController::class, 'vote']);
-    Route::post('unvote{website_id}', [UtilityController::class, 'unvote']);
+    Route::get('website', [WebsiteController::class, 'view']);
+    Route::post('website/delete', [WebsiteController::class, 'delete'])->middleware('admin');
+    Route::post('vote', [UtilityController::class, 'vote']);
+    Route::post('unvote', [UtilityController::class, 'unvote']);
 });

@@ -47,5 +47,7 @@ class CrudService implements CrudServiceInterface
     public function deleteModel(Model $model)
     {
         $model->delete();
+
+        return true;
     }
 }

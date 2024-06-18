@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Contracts\CrudServiceInterface;
 use App\Helpers\ResponseHelper;
 use App\Http\Requests\WebsiteRequest;
+use App\Http\Requests\WebsiteShowRequest;
 use App\Models\Website;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Model;
 
 class WebsiteController extends Controller
 {
@@ -37,20 +37,25 @@ class WebsiteController extends Controller
         }
     }
 
-    public function view($id)
+    public function view(WebsiteShowRequest $request)
     {
-        $model = Website::find($id);
+        $model = Website::find($request->id);
 
         $data = $this->crudService->view($model);
 
         return ResponseHelper::success(true, 'successfully fecthed data', $data, 200);
     }
 
-    public function delete(Model $model)
+    public function delete(WebsiteShowRequest $request)
     {
-        $model = new Website();
-        $this->crudService->deleteModel($model);
+        $model = Website::find($request->id);
 
-        return ResponseHelper::success(true, 'deleted succesfully', null, 204);
+        if ($model) {
+            $this->crudService->deleteModel($model);
+
+            return ResponseHelper::success(true, 'deleted succesfully', null, 204);
+        }
+
+        return ResponseHelper::error(false, 'model not found', 401);
     }
 }
