@@ -16,12 +16,12 @@ use Illuminate\Support\Facades\Route;
 |guest can  view listings  search and  filter
 */
 Route::get('list', [UtilityController::class, 'listing']);
+Route::get('website', [WebsiteController::class, 'view']);
 Route::post('login', [AuthenticantionController::class, 'login']);
 Route::get('logout', [AuthenticantionController::class, 'logout']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('create', [WebsiteController::class, 'create']);
-    Route::get('website', [WebsiteController::class, 'view']);
     Route::post('website/delete', [WebsiteController::class, 'delete'])->middleware('admin');
     Route::post('vote', [UtilityController::class, 'vote']);
     Route::post('unvote', [UtilityController::class, 'unvote']);
